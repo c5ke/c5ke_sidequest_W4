@@ -1,88 +1,101 @@
-/*
-Week 4 — Example 5: Example 5: Blob Platformer (JSON + Classes)
-Course: GBDA302
-Instructors: Dr. Karen Cochrane and David Han
-Date: Feb. 5, 2026
-
-This file orchestrates everything:
-- load JSON in preload()
-- create WorldLevel from JSON
-- create BlobPlayer
-- update + draw each frame
-- handle input events (jump, optional next level)
-
-This matches the structure of the original blob sketch from Week 2 but moves
-details into classes.
-*/
-
-let data; // raw JSON data
+let data;
 let levelIndex = 0;
 
-let world; // WorldLevel instance (current level)
-let player; // BlobPlayer instance
+let world;
+let player;
+let star; // {x, y, r}
 
 function preload() {
-  // Load the level data from disk before setup runs.
   data = loadJSON("levels.json");
 }
 
 function setup() {
-  // Create the player once (it will be respawned per level).
   player = new BlobPlayer();
-
-  // Load the first level.
   loadLevel(0);
-
-  // Simple shared style setup.
   noStroke();
   textFont("sans-serif");
   textSize(14);
 }
 
 function draw() {
-  // 1) Draw the world (background + platforms)
   world.drawWorld();
-
-  // 2) Update and draw the player on top of the world
   player.update(world.platforms);
   player.draw(world.theme.blob);
 
-  // 3) HUD
+  // Draw the star
+  fill("#FFD700");
+  ellipse(star.x, star.y, star.r * 2);
+
+  // HUD
   fill(0);
   text(world.name, 10, 18);
-  text("Move: A/D or ←/→ • Jump: Space/W/↑ • Next: N", 10, 36);
+  text("Move: A/D or ←/→ • Jump: Space/W/↑", 10, 36);
+
+  // Check if player touches the star
+  if (dist(player.x, player.y, star.x, star.y) < player.r + star.r) {
+    loadLevel((levelIndex + 1) % data.levels.length);
+  }
 }
 
 function keyPressed() {
-  // Jump keys
   if (key === " " || key === "W" || key === "w" || keyCode === UP_ARROW) {
     player.jump();
   }
-
-  // Optional: cycle levels with N (as with the earlier examples)
-  if (key === "n" || key === "N") {
-    const next = (levelIndex + 1) % data.levels.length;
-    loadLevel(next);
-  }
 }
 
-/*
-Load a level by index:
-- create a WorldLevel instance from JSON
-- resize canvas based on inferred geometry
-- spawn player using level start + physics
-*/
 function loadLevel(i) {
   levelIndex = i;
+  const levelJson = data.levels[levelIndex];
 
-  // Create the world object from the JSON level object.
-  world = new WorldLevel(data.levels[levelIndex]);
+  // Generate platforms dynamically if empty
+  if (levelJson.platforms.length === 0) {
+    levelJson.platforms = generatePlatforms(levelJson.name);
+  }
 
-  // Fit canvas to world geometry (or defaults if needed).
+  world = new WorldLevel(levelJson);
+
   const W = world.inferWidth(640);
   const H = world.inferHeight(360);
   resizeCanvas(W, H);
 
-  // Apply level settings + respawn.
   player.spawnFromLevel(world);
+
+  // Place star at the last platform’s center
+  const lastPlat = world.platforms[world.platforms.length - 1];
+  star = {
+    x: lastPlat.x + lastPlat.w / 2,
+    y: lastPlat.y - 15,
+    r: 10
+  };
+}
+
+/*
+Dynamically generate platforms for each level
+*/
+function generatePlatforms(levelName) {
+  let platforms = [];
+
+  if (levelName === "Intro Steps") {
+    // Staircase using a loop
+    for (let i = 0; i < 5; i++) {
+      platforms.push({
+        x: 50 + i * 120,
+        y: 324 - i * 60,
+        w: 100,
+        h: 12
+      });
+    }
+  } else if (levelName === "Looped Challenge") {
+    // Grid of floating platforms
+    for (let i = 0; i < 5; i++) {
+      platforms.push({
+        x: 50 + i * 120,
+        y: 324 - i * 60,
+        w: 100,
+        h: 12
+      });
+    }
+  }
+
+  return platforms;
 }
