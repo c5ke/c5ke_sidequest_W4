@@ -1,42 +1,25 @@
-## Project Title
-
-GBDA302 Week 4 Example 5: Blob Platformer (JSON + Classes)
+## Sidequest 4
 
 ---
 
-## Authors
+## Group Members
 
-Karen Cochrane and David Han
+Cherry Ke c5ke 21090404
 
 ---
 
 ## Description
 
-This matches the structure of the original blob sketch from Week 2 but moves
-details into classes.
+Sidequest 4 for gbda 302
 
 ---
 
-## Learning Goals
+## Interaction Instructions
 
-Learning Goals:
-
-- - load JSON in preload()
-- create WorldLevel from JSON
-- create BlobPlayer
-- update + draw each frame
-- handle input events (jump, optional next level)
-
----
-
-## Assets
-
-N/A
+Get to the golden ball using arrows or WASD
 
 ---
 
 ## GenAI
 
-The code was written by Dr. Karen Cochrane and David Han but they used GenAI to write the comments.
-
----
+GenAI was used to edit the code. Original code was written by David Han and Dr Karen Cochrane.
